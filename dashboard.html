@@ -1,0 +1,228 @@
+{% extends 'tracker/base.html' %}
+{% block content %}
+<div class="card">
+    <h1>💰 Financial Dashboard</h1>
+
+    <div class="stats-grid">
+        <div class="stat-card stat-salary">
+            <div class="stat-value">${{ total_salary|floatformat:2 }}</div>
+            <div class="stat-label">Total Salary</div>
+        </div>
+
+        <div class="stat-card stat-budget">
+            <div class="stat-value">${{ total_budget|floatformat:2 }}</div>
+            <div class="stat-label">Total Budget</div>
+        </div>
+
+        <div class="stat-card stat-expenses">
+            <div class="stat-value">${{ total_expenses|floatformat:2 }}</div>
+            <div class="stat-label">Total Expenses</div>
+        </div>
+    </div>
+
+    <!-- Smart Alerts Section -->
+    {% if alerts %}
+        <div class="alerts-container">
+            {% for alert in alerts %}
+                <div class="smart-alert alert-{{ alert.type }}" id="alert-{{ forloop.counter }}">
+                    <div class="alert-header">
+                        <span class="alert-icon">{{ alert.icon }}</span>
+                        <span class="alert-title">{{ alert.title }}</span>
+                        <button class="alert-dismiss" onclick="dismissAlert('alert-{{ forloop.counter }}')" title="Dismiss alert">×</button>
+                    </div>
+                    <div class="alert-content">
+                        <p class="alert-message">{{ alert.message }}</p>
+                        <p class="alert-action">💡 <strong>Recommendation:</strong> {{ alert.action }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<!-- Chart Section -->
+{% if chart_labels %}
+<div class="card">
+    <h2>📊 Budget vs Expenses Analysis</h2>
+    <div class="chart-container">
+        <canvas id="budgetExpensesChart"></canvas>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('budgetExpensesChart').getContext('2d');
+
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [{
+                label: '💰 Budget',
+                data: {{ chart_budget_data|safe }},
+                backgroundColor: 'rgba(66, 153, 225, 0.8)',
+                borderColor: 'rgba(66, 153, 225, 1)',
+                borderWidth: 2,
+                borderRadius: 8,
+                borderSkipped: false,
+            }, {
+                label: '💸 Expenses',
+                data: {{ chart_expenses_data|safe }},
+                backgroundColor: 'rgba(245, 101, 101, 0.8)',
+                borderColor: 'rgba(245, 101, 101, 1)',
+                borderWidth: 2,
+                borderRadius: 8,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Budget vs Expenses Over Time',
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    },
+                    color: '#4a5568'
+                },
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 12,
+                            weight: '600'
+                        },
+                        color: '#4a5568',
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    titleColor: '#4a5568',
+                    bodyColor: '#4a5568',
+                    borderColor: 'rgba(102, 126, 234, 0.3)',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    displayColors: true,
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': $' + context.parsed.y.toLocaleString();
+                        },
+                        afterLabel: function(context) {
+                            if (context.datasetIndex === 0) {
+                                const expenseValue = context.chart.data.datasets[1].data[context.dataIndex];
+                                const budgetValue = context.parsed.y;
+                                const difference = budgetValue - expenseValue;
+                                if (difference > 0) {
+                                    return 'Remaining: $' + difference.toLocaleString();
+                                } else {
+                                    return 'Over budget: $' + Math.abs(difference).toLocaleString();
+                                }
+                            }
+                            return '';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        color: '#718096',
+                        font: {
+                            size: 11
+                        },
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#718096',
+                        font: {
+                            size: 11
+                        }
+                    }
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            animation: {
+                duration: 1000,
+                easing: 'easeInOutQuart'
+            }
+        }
+    });
+});
+
+// Alert dismiss functionality
+function dismissAlert(alertId) {
+    const alert = document.getElementById(alertId);
+    if (alert) {
+        alert.style.transform = 'translateX(100%)';
+        alert.style.opacity = '0';
+        setTimeout(() => {
+            alert.remove();
+
+            // Check if no alerts remain
+            const alertsContainer = document.querySelector('.alerts-container');
+            if (alertsContainer && alertsContainer.children.length === 0) {
+                alertsContainer.remove();
+            }
+        }, 300);
+    }
+}
+</script>
+
+<!-- Chart Insights -->
+<div class="card">
+    <h3>📈 Financial Insights</h3>
+    <div class="insights-grid">
+        <div class="insight-item">
+            <div class="insight-icon">📊</div>
+            <div class="insight-content">
+                <div class="insight-title">Average Budget</div>
+                <div class="insight-value">${{ avg_budget|floatformat:2 }}</div>
+            </div>
+        </div>
+        <div class="insight-item">
+            <div class="insight-icon">💸</div>
+            <div class="insight-content">
+                <div class="insight-title">Average Expenses</div>
+                <div class="insight-value">${{ avg_expenses|floatformat:2 }}</div>
+            </div>
+        </div>
+        <div class="insight-item">
+            <div class="insight-icon">{% if total_budget >= total_expenses %}✅{% else %}⚠️{% endif %}</div>
+            <div class="insight-content">
+                <div class="insight-title">Budget Status</div>
+                <div class="insight-value">{% if total_budget >= total_expenses %}On Track{% else %}Over Budget{% endif %}</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div style="text-align: center; padding: 3rem; color: #718096;">
+        <h3>📊 No data for chart</h3>
+        <p>Add some financial entries to see your budget vs expenses visualization!</p>
+        <a href="{% url 'entry_form' %}" style="color: #667eea; text-decoration: none; font-weight: 600;">Add your first entry</a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

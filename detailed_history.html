@@ -1,0 +1,104 @@
+{% extends 'tracker/base.html' %}
+{% block content %}
+<div class="card">
+    <h2>📊 Detailed Transaction History</h2>
+
+    {% if entries %}
+        <div class="detailed-history">
+            {% for entry in entries %}
+                <div class="history-entry">
+                    <div class="entry-header">
+                        <h3>📅 {{ entry.date|date:"M d, Y - H:i" }}</h3>
+                        <div class="entry-totals">
+                            <span class="total-budget">Total Budget: ${{ entry.total_budget|floatformat:2 }}</span>
+                            <span class="total-expenses">Total Expenses: ${{ entry.total_expenses|floatformat:2 }}</span>
+                            <span class="salary">Salary: ${{ entry.salary|floatformat:2 }}</span>
+                        </div>
+                    </div>
+
+                    <div class="categories-breakdown">
+                        <div class="category-row">
+                            <div class="category-item">
+                                <span class="category-icon">🎓</span>
+                                <span class="category-name">Education</span>
+                                <div class="category-values">
+                                    <span class="budget-val">Budget: ${{ entry.budget_education|floatformat:2 }}</span>
+                                    <span class="expense-val">Spent: ${{ entry.expense_education|floatformat:2 }}</span>
+                                </div>
+                            </div>
+
+                            <div class="category-item">
+                                <span class="category-icon">🎬</span>
+                                <span class="category-name">Entertainment</span>
+                                <div class="category-values">
+                                    <span class="budget-val">Budget: ${{ entry.budget_entertainment|floatformat:2 }}</span>
+                                    <span class="expense-val">Spent: ${{ entry.expense_entertainment|floatformat:2 }}</span>
+                                </div>
+                            </div>
+
+                            <div class="category-item">
+                                <span class="category-icon">🏠</span>
+                                <span class="category-name">Housing</span>
+                                <div class="category-values">
+                                    <span class="budget-val">Budget: ${{ entry.budget_housing|floatformat:2 }}</span>
+                                    <span class="expense-val">Spent: ${{ entry.expense_housing|floatformat:2 }}</span>
+                                </div>
+                            </div>
+
+                            <div class="category-item">
+                                <span class="category-icon">🚗</span>
+                                <span class="category-name">Transport</span>
+                                <div class="category-values">
+                                    <span class="budget-val">Budget: ${{ entry.budget_transport|floatformat:2 }}</span>
+                                    <span class="expense-val">Spent: ${{ entry.expense_transport|floatformat:2 }}</span>
+                                </div>
+                            </div>
+
+                            <div class="category-item">
+                                <span class="category-icon">🍽️</span>
+                                <span class="category-name">Food</span>
+                                <div class="category-values">
+                                    <span class="budget-val">Budget: ${{ entry.budget_food|floatformat:2 }}</span>
+                                    <span class="expense-val">Spent: ${{ entry.expense_food|floatformat:2 }}</span>
+                                </div>
+                            </div>
+
+                            <div class="category-item">
+                                <span class="category-icon">⚡</span>
+                                <span class="category-name">Utilities</span>
+                                <div class="category-values">
+                                    <span class="budget-val">Budget: ${{ entry.budget_utilities|floatformat:2 }}</span>
+                                    <span class="expense-val">Spent: ${{ entry.expense_utilities|floatformat:2 }}</span>
+                                </div>
+                            </div>
+
+                            <div class="category-item">
+                                <span class="category-icon">📦</span>
+                                <span class="category-name">Others</span>
+                                <div class="category-values">
+                                    <span class="budget-val">Budget: ${{ entry.budget_others|floatformat:2 }}</span>
+                                    <span class="expense-val">Spent: ${{ entry.expense_others|floatformat:2 }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="entry-summary">
+                        {% if entry.total_expenses > entry.total_budget %}
+                            <span class="over-budget">⚠️ Over Budget</span>
+                        {% else %}
+                            <span class="under-budget">✅ Within Budget</span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 3rem; color: #718096;">
+            <h3>📊 No detailed entries yet</h3>
+            <p>Start tracking your finances with detailed categories!</p>
+            <a href="{% url 'detailed_entry_form' %}" style="color: #667eea; text-decoration: none; font-weight: 600;">Add your first detailed entry</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

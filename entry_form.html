@@ -1,0 +1,13 @@
+{% extends 'tracker/base.html' %}
+{% block content %}
+<div class="card">
+    <h2>💼 Add Financial Entry</h2>
+    <form method="post">
+        {% csrf_token %}
+        <input type="number" step="0.01" name="salary" placeholder="💰 Enter your salary" required>
+        <input type="number" step="0.01" name="budget" placeholder="📊 Enter your budget" required>
+        <input type="number" step="0.01" name="expenses" placeholder="💸 Enter your expenses" required>
+        <button type="submit">💾 Save Entry</button>
+    </form>
+</div>
+{% endblock %}

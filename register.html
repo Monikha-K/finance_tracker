@@ -1,0 +1,16 @@
+{% extends 'tracker/base.html' %}
+{% block content %}
+<div class="card">
+    <h2>📝 Create Account</h2>
+    <form method="post">
+        {% csrf_token %}
+        <input type="text" name="username" placeholder="Choose a username" required>
+        <input type="password" name="password" placeholder="Create a password" required>
+        <button type="submit">Create Account</button>
+    </form>
+    <p style="text-align: center; margin-top: 1rem; color: #718096;">
+        Already have an account? <a href="{% url 'login' %}" style="color: #667eea; text-decoration: none; font-weight: 600;">Sign in here</a>
+    </p>
+</div>
+{% endblock %}
+

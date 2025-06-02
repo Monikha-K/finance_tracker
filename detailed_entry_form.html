@@ -1,0 +1,128 @@
+{% extends 'tracker/base.html' %}
+{% block content %}
+<div class="card">
+    <h2>💼 Add Detailed Financial Entry</h2>
+    <form method="post" class="detailed-form">
+        {% csrf_token %}
+        
+        <!-- Salary Section -->
+        <div class="form-section">
+            <h3>💰 Income</h3>
+            <div class="form-group">
+                <label for="salary">Monthly Salary</label>
+                <input type="number" step="0.01" name="salary" id="salary" placeholder="Enter your monthly salary" required>
+            </div>
+        </div>
+
+        <!-- Budget Section -->
+        <div class="form-section">
+            <h3>📊 Budget Allocation</h3>
+            <div class="category-grid">
+                <div class="form-group">
+                    <label for="budget_education">🎓 Education</label>
+                    <input type="number" step="0.01" name="budget_education" id="budget_education" placeholder="Budget for education" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="budget_entertainment">🎬 Entertainment</label>
+                    <input type="number" step="0.01" name="budget_entertainment" id="budget_entertainment" placeholder="Budget for entertainment" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="budget_housing">🏠 Housing</label>
+                    <input type="number" step="0.01" name="budget_housing" id="budget_housing" placeholder="Budget for housing" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="budget_transport">🚗 Transport</label>
+                    <input type="number" step="0.01" name="budget_transport" id="budget_transport" placeholder="Budget for transport" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="budget_food">🍽️ Food</label>
+                    <input type="number" step="0.01" name="budget_food" id="budget_food" placeholder="Budget for food" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="budget_utilities">⚡ Utilities</label>
+                    <input type="number" step="0.01" name="budget_utilities" id="budget_utilities" placeholder="Budget for utilities" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="budget_others">📦 Others</label>
+                    <input type="number" step="0.01" name="budget_others" id="budget_others" placeholder="Budget for others" value="0">
+                </div>
+            </div>
+            <div class="budget-total">
+                <strong>Total Budget: $<span id="total-budget">0.00</span></strong>
+            </div>
+        </div>
+
+        <!-- Expenses Section -->
+        <div class="form-section">
+            <h3>💸 Actual Expenses</h3>
+            <div class="category-grid">
+                <div class="form-group">
+                    <label for="expense_education">🎓 Education</label>
+                    <input type="number" step="0.01" name="expense_education" id="expense_education" placeholder="Spent on education" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="expense_entertainment">🎬 Entertainment</label>
+                    <input type="number" step="0.01" name="expense_entertainment" id="expense_entertainment" placeholder="Spent on entertainment" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="expense_housing">🏠 Housing</label>
+                    <input type="number" step="0.01" name="expense_housing" id="expense_housing" placeholder="Spent on housing" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="expense_transport">🚗 Transport</label>
+                    <input type="number" step="0.01" name="expense_transport" id="expense_transport" placeholder="Spent on transport" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="expense_food">🍽️ Food</label>
+                    <input type="number" step="0.01" name="expense_food" id="expense_food" placeholder="Spent on food" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="expense_utilities">⚡ Utilities</label>
+                    <input type="number" step="0.01" name="expense_utilities" id="expense_utilities" placeholder="Spent on utilities" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="expense_others">📦 Others</label>
+                    <input type="number" step="0.01" name="expense_others" id="expense_others" placeholder="Spent on others" value="0">
+                </div>
+            </div>
+            <div class="expense-total">
+                <strong>Total Expenses: $<span id="total-expenses">0.00</span></strong>
+            </div>
+        </div>
+
+        <button type="submit" class="submit-btn">💾 Save Detailed Entry</button>
+    </form>
+</div>
+
+<script>
+// Calculate totals in real-time
+function updateTotals() {
+    // Calculate budget total
+    const budgetInputs = document.querySelectorAll('input[name^="budget_"]');
+    let budgetTotal = 0;
+    budgetInputs.forEach(input => {
+        budgetTotal += parseFloat(input.value) || 0;
+    });
+    document.getElementById('total-budget').textContent = budgetTotal.toFixed(2);
+    
+    // Calculate expense total
+    const expenseInputs = document.querySelectorAll('input[name^="expense_"]');
+    let expenseTotal = 0;
+    expenseInputs.forEach(input => {
+        expenseTotal += parseFloat(input.value) || 0;
+    });
+    document.getElementById('total-expenses').textContent = expenseTotal.toFixed(2);
+}
+
+// Add event listeners to all budget and expense inputs
+document.addEventListener('DOMContentLoaded', function() {
+    const allInputs = document.querySelectorAll('input[name^="budget_"], input[name^="expense_"]');
+    allInputs.forEach(input => {
+        input.addEventListener('input', updateTotals);
+    });
+    
+    // Initial calculation
+    updateTotals();
+});
+</script>
+{% endblock %}

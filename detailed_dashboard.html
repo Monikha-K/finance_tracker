@@ -1,0 +1,192 @@
+{% extends 'tracker/base.html' %}
+{% block content %}
+<div class="card">
+    <h1>📊 Detailed Financial Dashboard</h1>
+
+    <div class="stats-grid">
+        <div class="stat-card stat-salary">
+            <div class="stat-value">${{ total_salary|floatformat:2 }}</div>
+            <div class="stat-label">Total Salary</div>
+        </div>
+
+        <div class="stat-card stat-budget">
+            <div class="stat-value">${{ total_budget|floatformat:2 }}</div>
+            <div class="stat-label">Total Budget</div>
+        </div>
+
+        <div class="stat-card stat-expenses">
+            <div class="stat-value">${{ total_expenses|floatformat:2 }}</div>
+            <div class="stat-label">Total Expenses</div>
+        </div>
+    </div>
+</div>
+
+<!-- Category Breakdown Chart -->
+{% if categories %}
+<div class="card">
+    <h2>📈 Category Breakdown</h2>
+    <div class="chart-container">
+        <canvas id="categoryChart"></canvas>
+    </div>
+</div>
+
+<!-- Timeline Chart -->
+<div class="card">
+    <h2>📅 Budget vs Expenses Timeline</h2>
+    <div class="chart-container">
+        <canvas id="timelineChart"></canvas>
+    </div>
+</div>
+
+<!-- Category Details -->
+<div class="card">
+    <h2>💰 Category Analysis</h2>
+    <div class="category-analysis">
+        {% for category in category_data %}
+            <div class="category-item">
+                <div class="category-header">
+                    <span class="category-name">
+                        {{ category.icon }}
+                        {{ category.name }}
+                    </span>
+                    <div class="category-amounts">
+                        <span class="budget-amount">Budget: ${{ category.budget|floatformat:2 }}</span>
+                        <span class="expense-amount">Spent: ${{ category.expense|floatformat:2 }}</span>
+                    </div>
+                </div>
+                <div class="category-progress">
+                    <div class="progress-bar">
+                        {% if category.budget > 0 %}
+                            <div class="progress-fill" style="width: {% widthratio category.expense category.budget 100 %}%"></div>
+                        {% else %}
+                            <div class="progress-fill" style="width: 0%"></div>
+                        {% endif %}
+                    </div>
+                    <span class="progress-text">
+                        {% if category.budget > 0 %}
+                            {% widthratio category.expense category.budget 100 %}% used
+                        {% else %}
+                            0% used
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Category Breakdown Chart
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    new Chart(categoryCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ categories|safe }},
+            datasets: [{
+                label: '💰 Budget',
+                data: {{ category_budget_totals|safe }},
+                backgroundColor: 'rgba(66, 153, 225, 0.8)',
+                borderColor: 'rgba(66, 153, 225, 1)',
+                borderWidth: 2,
+                borderRadius: 8,
+            }, {
+                label: '💸 Expenses',
+                data: {{ category_expense_totals|safe }},
+                backgroundColor: 'rgba(245, 101, 101, 0.8)',
+                borderColor: 'rgba(245, 101, 101, 1)',
+                borderWidth: 2,
+                borderRadius: 8,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Budget vs Expenses by Category',
+                    font: { size: 16, weight: 'bold' },
+                    color: '#4a5568'
+                },
+                legend: {
+                    position: 'top',
+                    labels: {
+                        font: { size: 12, weight: '600' },
+                        color: '#4a5568',
+                        usePointStyle: true
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Timeline Chart
+    const timelineCtx = document.getElementById('timelineChart').getContext('2d');
+    new Chart(timelineCtx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [{
+                label: '💰 Budget',
+                data: {{ chart_budget_data|safe }},
+                borderColor: 'rgba(66, 153, 225, 1)',
+                backgroundColor: 'rgba(66, 153, 225, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }, {
+                label: '💸 Expenses',
+                data: {{ chart_expenses_data|safe }},
+                borderColor: 'rgba(245, 101, 101, 1)',
+                backgroundColor: 'rgba(245, 101, 101, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Financial Trends Over Time',
+                    font: { size: 16, weight: 'bold' },
+                    color: '#4a5568'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% else %}
+<div class="card">
+    <div style="text-align: center; padding: 3rem; color: #718096;">
+        <h3>📊 No detailed data yet</h3>
+        <p>Start tracking your finances with detailed categories!</p>
+        <a href="{% url 'detailed_entry_form' %}" style="color: #667eea; text-decoration: none; font-weight: 600;">Add your first detailed entry</a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
